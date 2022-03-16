@@ -1,0 +1,3 @@
+PACKAGE = configvault
+NAMESPACE = github.com/akerl
+VERSION_VAR_PATH = version.Version

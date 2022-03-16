@@ -1,0 +1,30 @@
+name 'configvault'
+org 'akerl'
+
+source(
+  type: 'git',
+  path: '.'
+)
+
+build do
+  run 'make local'
+  cp 'bin'
+end
+
+package(
+  type: 'file',
+  artifacts: [
+    {
+      source: 'bin/speculate_darwin',
+      name: 'speculate_darwin'
+    },
+    {
+      source: 'bin/speculate_linux',
+      name: 'speculate_linux'
+    }
+  ]
+)
+
+test do
+  # TODO: add tests
+end
