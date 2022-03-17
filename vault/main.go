@@ -4,9 +4,11 @@ import (
 	"context"
 	"strings"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 )
 
 // Path describes a specific object in the vault
@@ -31,7 +33,7 @@ var category = map[bool]string{
 
 // Read returns the value for a Path
 func Read(p Path) (string, error) {
-	c, err := aws.GetClient()
+	c, err := ah.GetS3Client()
 	if err != nil {
 		return "", err
 	}
@@ -55,7 +57,7 @@ func Read(p Path) (string, error) {
 
 // Write sets the value for a Path
 func Write(p Path, data string) error {
-	c, err := aws.GetClient()
+	c, err := ah.GetS3Client()
 	if err != nil {
 		return err
 	}
@@ -73,7 +75,7 @@ func Write(p Path, data string) error {
 
 // Search returns a list of users that match a Query
 func Search(q Query) ([]string, error) {
-	c, err := aws.GetClient()
+	c, err := ah.GetS3Client()
 	if err != nil {
 		return []string{}, err
 	}
@@ -103,18 +105,42 @@ func Search(q Query) ([]string, error) {
 }
 
 type awsHelper struct {
-	client *s3.Client
+	config    *aws.Config
+	s3Client  *s3.Client
+	stsClient *sts.Client
 }
 
-func (a *awsHelper) GetClient() (*s3.Client, error) {
-	if a.client == nil {
+func (a *awsHelper) getConfig() (*aws.Config, error) {
+	if a.config == nil {
 		cfg, err := config.LoadDefaultConfig(context.TODO())
 		if err != nil {
 			return nil, err
 		}
-		a.client = s3.NewFromConfig(cfg)
+		a.config = &cfg
 	}
-	return a.client, nil
+	return a.config, nil
 }
 
-var aws = awsHelper{}
+func (a *awsHelper) GetS3Client() (*s3.Client, error) {
+	if a.s3Client == nil {
+		cfg, err := a.getConfig()
+		if err != nil {
+			return nil, err
+		}
+		a.s3Client = s3.NewFromConfig(*cfg)
+	}
+	return a.s3Client, nil
+}
+
+func (a *awsHelper) GetStsClient() (*sts.Client, error) {
+	if a.stsClient == nil {
+		cfg, err := a.getConfig()
+		if err != nil {
+			return nil, err
+		}
+		a.stsClient = sts.NewFromConfig(*cfg)
+	}
+	return a.stsClient, nil
+}
+
+var ah = awsHelper{}
