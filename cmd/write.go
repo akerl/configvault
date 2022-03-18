@@ -31,6 +31,10 @@ func writeRunner(cmd *cobra.Command, args []string) error {
 	if len(args) == 3 {
 		data = args[2]
 	} else {
+		fi, _ := os.Stdin.Stat()
+		if (fi.Mode() & os.ModeCharDevice) != 0 {
+			return fmt.Errorf("no stdin provided")
+		}
 		b, err := io.ReadAll(os.Stdin)
 		if err != nil {
 			return err

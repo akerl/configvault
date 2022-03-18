@@ -61,8 +61,7 @@ func Read(p Path) (string, error) {
 
 	key := category[p.Public] + "/" + user + "/" + p.Key
 
-	buffer := []byte{}
-	writer := manager.NewWriteAtBuffer(buffer)
+	writer := manager.NewWriteAtBuffer([]byte{})
 
 	downloader := manager.NewDownloader(c)
 	_, err = downloader.Download(context.TODO(), writer, &s3.GetObjectInput{
@@ -73,7 +72,7 @@ func Read(p Path) (string, error) {
 		return "", err
 	}
 
-	return string(buffer), nil
+	return string(writer.Bytes()), nil
 }
 
 // Write sets the value for a Path
