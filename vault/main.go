@@ -31,6 +31,22 @@ var category = map[bool]string{
 	false: "private",
 }
 
+func lookupUser(given string) (string, error) {
+	if given != "" {
+		return given, nil
+	}
+	c, err := ah.GetStsClient()
+	if err != nil {
+		return "", err
+	}
+	resp, err := c.GetCallerIdentity(context.TODO(), &sts.GetCallerIdentityInput{})
+	if err != nil {
+		return "", err
+	}
+	parts := strings.Split(*resp.Arn, "/")
+	return parts[len(parts)-1], nil
+}
+
 // Read returns the value for a Path
 func Read(p Path) (string, error) {
 	c, err := ah.GetS3Client()
@@ -38,7 +54,12 @@ func Read(p Path) (string, error) {
 		return "", err
 	}
 
-	key := category[p.Public] + "/" + p.User + "/" + p.Key
+	user, err := lookupUser(p.User)
+	if err != nil {
+		return "", err
+	}
+
+	key := category[p.Public] + "/" + user + "/" + p.Key
 
 	buffer := []byte{}
 	writer := manager.NewWriteAtBuffer(buffer)
@@ -62,7 +83,12 @@ func Write(p Path, data string) error {
 		return err
 	}
 
-	key := category[p.Public] + "/" + p.User + "/" + p.Key
+	user, err := lookupUser(p.User)
+	if err != nil {
+		return err
+	}
+
+	key := category[p.Public] + "/" + user + "/" + p.Key
 
 	uploader := manager.NewUploader(c)
 	_, err = uploader.Upload(context.TODO(), &s3.PutObjectInput{
