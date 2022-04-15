@@ -35,7 +35,7 @@ func readRunner(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Println(result)
+	fmt.Print(result)
 	return nil
 }
 
