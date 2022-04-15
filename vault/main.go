@@ -98,6 +98,28 @@ func Write(p Path, data string) error {
 	return err
 }
 
+// Delete removes the value for a Path
+func Delete(p Path) error {
+	c, err := ah.GetS3Client()
+	if err != nil {
+		return err
+	}
+
+	user, err := lookupUser(p.User)
+	if err != nil {
+		return err
+	}
+
+	key := category[p.Public] + "/" + user + "/" + p.Key
+
+	_, err = c.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
+		Bucket: &p.Bucket,
+		Key:    &key,
+	})
+
+	return err
+}
+
 // Search returns a list of users that match a Query
 func Search(q Query) ([]string, error) {
 	c, err := ah.GetS3Client()
