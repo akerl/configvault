@@ -1,6 +1,7 @@
 configvault
 =========
 
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/akerl/configvault/Build)](https://github.com/akerl/configvault/actions)
 [![GitHub release](https://img.shields.io/github/release/akerl/configvault.svg)](https://github.com/akerl/configvault/releases)
 [![License](https://img.shields.io/github/license/akerl/configvault)](https://github.com/akerl/configvault/blob/master/LICENSE)
 
